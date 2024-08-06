@@ -1,0 +1,89 @@
+from dotenv import load_dotenv
+import telebot
+import os
+import webbrowser
+from telebot import types
+
+load_dotenv()
+
+Token_name = os.getenv('TOKEN')
+url_name = os.getenv('url')
+
+
+bot = telebot.TeleBot(Token_name)
+
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, f'Игра началась {message.from_user.username}!')
+
+
+@bot.message_handler()
+def get_audio(message):
+    markup = types.InlineKeyboardMarkup()
+    bt1 = types.InlineKeyboardButton('Перейти на сайт', url=url_name)  #кнопка 1 которая дает ссылку на сайт
+    bt2 = types.InlineKeyboardButton('Удалить фото', callback_data='delete')  #кнопка 2 которая удаляет фото
+    bt3 = types.InlineKeyboardButton('Редоктировать', callback_data='edit')  #кнопка 3 которая редоктирует сообщение
+    markup.row(bt1)  #1 ряд
+    markup.row(bt2, bt3)  #2 ряд
+    bot.reply_to(message, 'Крутое фото!', reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda callback: True)  
+def callback_message(callback):
+    if callback.data == 'delete':
+        bot.delete_message(callback.message.chat.id, callback.message.message_id - 1)  
+    elif callback.data == 'edit':
+        bot.edit_message_text('Edit text', callback.message.chat.id, callback.message.message_id)
+
+
+bot.polling(non_stop=True)
+------------------------------------------------------------------------------------------------------------------------------------
+from dotenv import load_dotenv
+import telebot
+import os
+import webbrowser
+from telebot import types
+
+load_dotenv()
+
+Token_name = os.getenv('TOKEN')
+url_name_arbuz = os.getenv('url_arbuz')
+url_name_kinopoisk = os.getenv('url_kinopoisk')
+url_name_ivi = os.getenv('url_ivi')
+
+
+bot = telebot.TeleBot(Token_name)
+
+
+#start
+
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    markup = types.ReplyKeyboardMarkup()
+    bt1 = types.KeyboardButton('арбуз')  #первое фото
+    bt2 = types.KeyboardButton('кинопоиск')  #второе фото
+    bt3 = types.KeyboardButton('иви')  #третье фото
+    markup.row(bt1)
+    markup.row(bt2, bt3)
+    file = open('./photo_1.jpg', 'rb')  #открываем файл с фотографией, который бот будет отправлять, при старте
+    bot.send_photo(message.chat.id, file, reply_markup=markup)  #отправляет фото
+    bot.send_message(message.chat.id, f'Игра началась {message.from_user.username}!', reply_markup=markup)
+    bot.register_next_step_handler(message, reply_markup_button)
+
+
+#reply_markup_button
+
+
+def reply_markup_button(message):
+    if message.text == 'арбуз':
+        webbrowser.open(url=url_name_arbuz)
+    elif message.text == 'кинопоиск':
+        webbrowser.open(url=url_name_kinopoisk)
+    elif message.text == 'иви':
+        webbrowser.open(url=url_name_ivi)
+
+
+
+bot.polling(non_stop=True)
