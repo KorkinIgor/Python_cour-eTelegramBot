@@ -1,0 +1,35 @@
+import sqlite3
+import telebot
+import os
+from dotenv import load_dotenv
+import requests
+import json
+
+load_dotenv()
+
+user_token = os.getenv('TOKEN')
+api_weather = os.getenv('API_WEATHER')
+
+
+
+
+bot = telebot.TeleBot(user_token)
+
+
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, 'Привет, напиши название города!')
+
+@bot.message_handler(content_types=['text'])
+def get_weather(message):
+    city = message.text.strip().lower()
+    res = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_weather}&units=metric")
+    date = res.json()
+    temp = date['main']['temp']
+    bot.reply_to(message, f'Сейчас погода: {temp}')
+
+
+
+
+bot.polling(non_stop=True)
