@@ -1,0 +1,20 @@
+import telebot
+from dotenv import load_dotenv
+import os
+from telebot import types
+
+
+load_dotenv()
+
+token = os.getenv("TOKEN")
+Sber_token = os.getenv("SberToken")
+
+bot = telebot.TeleBot(token)
+
+
+@bot.message_handler(commands=["start"])
+def start(message):
+    bot.send_invoice(message.chat.id, 'Покупка курса', 'Покупка банана', 'invoice', Sber_token, 'USD', [types.LabeledPrice('Покупка курса', 5*100)])
+
+
+bot.polling(non_stop=True)
